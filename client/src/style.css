@@ -94,10 +94,6 @@ table {
   width: 120px;
 }
 
-.garage {
-  display: none;
-}
-
 .create {
   display: none;
 }
@@ -123,10 +119,6 @@ table {
   width: 60px;
   height: 60px;
 
-}
-
-path {
-  fill: blueviolet;
 }
 
 .engine-buttons {
