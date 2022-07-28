@@ -1,19 +1,17 @@
 {
   "plugins": [
-    "prettier",
     "import"
   ],
   "extends": [
-    "plugin:prettier/recommended",
-    "prettier",
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
-    "plugin:@typescript-eslint/recommended-requiring-type-checking"
+    "plugin:@typescript-eslint/recommended-requiring-type-checking",
+    "airbnb-typescript/base"
   ],
   "root": true,
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
-    "project": "./client/tsconfig.json",
+    "project": "./tsconfig.json",
     "ecmaVersion": 2020,
     "sourceType": "module"
   },
