@@ -19,12 +19,7 @@ module.exports = {
       {
         test: /\.ts$/i,
         use: [
-          {
-            loader: 'ts-loader',
-            options: {
-              configFile: './client/tsconfig.json'
-            }
-          }
+          'ts-loader',
         ]
       }
     ]

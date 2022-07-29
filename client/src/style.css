@@ -94,10 +94,6 @@ table {
   width: 120px;
 }
 
-.create {
-  display: none;
-}
-
 .road {
   border-bottom: 2px dashed;
   color: black;

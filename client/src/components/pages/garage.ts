@@ -20,6 +20,7 @@ class GaragePage {
       carList.append(this.drawCar('yellow', 'VW'));
       carList.append(this.drawCar('green', 'Ford'));
     }
+    document.body.append(this.drawCarCreator());
     document.body.append(garagePage);
   }
 
@@ -43,6 +44,27 @@ class GaragePage {
               </div>
             </div>`;
     return car;
+  }
+
+  drawCarCreator() {
+    const carCreator = document.createElement('div');
+    carCreator.classList.add('create');
+    carCreator.innerHTML = ` <div class="create-cars">
+    <input type="text">
+    <input type="color">
+    <button class="btn">Create</button>
+  </div>
+  <div class="update-cars">
+    <input type="text">
+    <input type="color">
+    <button class="btn">Update</button>
+  </div>
+  <div class="interactivity-cars">
+    <button class="btn">Race</button>
+    <button class="btn">Reset</button>
+    <button class="btn">Generate</button>
+  </div>`;
+    return carCreator;
   }
 }
 export default GaragePage;
