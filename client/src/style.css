@@ -21,6 +21,15 @@ ul {
   outline: none;
 }
 
+.btn:hover {
+  cursor: pointer;
+  background-color: rgb(245, 245, 154);
+}
+
+.btn:disabled {
+  background-color: rgb(178, 176, 176);
+}
+
 body>div {
   margin-bottom: 20px;
 }

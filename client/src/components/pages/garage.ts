@@ -1,37 +1,81 @@
+import CarService from '../../services/car-service';
+
 class GaragePage {
-  drawPage() {
+
+  namesOfCars = ['BMW', 'Mersedes', 'Mazda', 'Toyota', 'Tesla', 'Volvo', 'VW', 'Opel', 'Jaguar', 'Shkoda'];
+
+  colors = ['red', 'pink', 'blue', 'black', 'teal', 'purple', 'yellow', 'green', 'brown', 'grey', 'salmon', 'black', 'fuchsia', 'gold', 'olive', 'crimson', 'cyan'];
+
+  static page = 1;
+
+  carsPerPage = 7;
+
+  async drawPage() {
     const garagePage = document.createElement('div');
+    const carInfo = await new CarService().getCars(this.carsPerPage, GaragePage.page);
+    const totalCars = carInfo[0];
+    const cars = carInfo[1];
+    const pagesCount = Math.ceil(totalCars / this.carsPerPage);
     garagePage.classList.add('garage');
-    garagePage.innerHTML = `<h2>Garage <span>50</span></h2>
-    <h3>Page 1</h3>
+    garagePage.innerHTML = `<h2>Garage <span>${totalCars}</span></h2>
+    <h3>Page ${GaragePage.page}</h3>
     <ul class="car-list"></ul>
     <div
       class="pagination">
       <button
-        class="btn">Prev</button>
+        class="btn" id='garage-prev'>Prev</button>
       <button
-        class="btn">Next</button>
+        class="btn" id='garage-next'>Next</button>
     </div>`;
+    garagePage.querySelector('#garage-next')?.addEventListener('click', async () => {
+      GaragePage.page++;
+      await this.reDrawPage();
+    });
+    garagePage.querySelector('#garage-prev')?.addEventListener('click', async () => {
+      GaragePage.page--;
+      await this.reDrawPage();
+    });
     const carList = garagePage.querySelector('.car-list');
     if (carList) {
-      carList.append(this.drawCar('red', 'Mersedes'));
-      carList.append(this.drawCar('blue', 'Tesla'));
-      carList.append(this.drawCar('black', 'Toyota'));
-      carList.append(this.drawCar('yellow', 'VW'));
-      carList.append(this.drawCar('green', 'Ford'));
+      cars.forEach((item) => {
+        carList.append(this.drawCar(item.name, item.color, item.id));
+      });
     }
-    document.body.append(this.drawCarCreator());
+    if (GaragePage.page === 1) {
+      (garagePage.querySelector('#garage-prev') as HTMLButtonElement).disabled = true;
+    }
+    if (GaragePage.page === pagesCount) {
+      (garagePage.querySelector('#garage-next') as HTMLButtonElement).disabled = true;
+    }
+    garagePage.prepend(this.drawCarCreator());
     document.body.append(garagePage);
   }
 
-  drawCar(color: string, name = 'BMW') {
+  async reDrawPage() {
+    document.querySelector('.garage')?.remove();
+    await this.drawPage();
+  }
+
+  async prevClickHandler() {
+    GaragePage.page--;
+    await this.reDrawPage();
+  }
+
+  async nextClickHandler() {
+    GaragePage.page++;
+    await this.reDrawPage();
+  }
+
+  drawCar(name = 'BMW', color = '#6edf64', id = 0) {
     const car = document.createElement('li');
     car.classList.add('car-item');
     car.innerHTML = `
     <div>
-      <button class="btn">Select</button>
+      <button id='select-btn' class="btn">Select</button>
       <button class="btn">Remove</button>
-      <span>${name}</span>
+      <input class='current-car-id' type='hidden' value=${id}>
+      <input class='current-car-color' type='hidden' value=${color}>
+      <span class='car-name'>${name}</span>
     </div>
     <div class="car-interactivity">
       <div class="road">
@@ -43,28 +87,80 @@ class GaragePage {
                 <div class="finish"></div>
               </div>
             </div>`;
+    car.querySelector('#select-btn')?.addEventListener('click', () => {
+      const text = document.querySelector<HTMLInputElement>('.update-cars input[type =\'text\']');
+      const carName = car.querySelector<HTMLElement>('.car-name');
+      if (!text) return;
+      if (!carName) return;
+      text.value = carName.innerText;
+      const oldColor = document.querySelector<HTMLInputElement>('.update-cars input[type =\'color\']');
+      const carColor = car.querySelector<SVGElement>('.car');
+      if (!oldColor) return;
+      if (!carColor) return;
+      oldColor.value = carColor.getAttribute('fill')!;
+      const prevCarId = document.querySelector<HTMLInputElement>('.update-cars input[type =\'hidden\']');
+      const carId = car.querySelector<HTMLInputElement>('.current-car-id');
+      if (!prevCarId) return;
+      if (!carId) return;
+      prevCarId.value = carId.value;
+    });
     return car;
   }
 
   drawCarCreator() {
+    const carService = new CarService();
     const carCreator = document.createElement('div');
     carCreator.classList.add('create');
     carCreator.innerHTML = ` <div class="create-cars">
-    <input type="text">
-    <input type="color">
-    <button class="btn">Create</button>
+    <input id="create-name" type="text">
+    <input id="create-color" type="color">
+    <button id="create-btn" class="btn">Create</button>
   </div>
   <div class="update-cars">
     <input type="text">
     <input type="color">
-    <button class="btn">Update</button>
+    <input type='hidden'>
+    <button  id="update-btn" class="btn">Update</button>
   </div>
   <div class="interactivity-cars">
     <button class="btn">Race</button>
     <button class="btn">Reset</button>
-    <button class="btn">Generate</button>
+    <button id='generate' class="btn">Generate</button>
   </div>`;
+    carCreator.querySelector('#generate')?.addEventListener('click', () => {
+      this.generateCars();
+    });
+    carCreator.querySelector('#create-btn')?.addEventListener('click', async () => {
+      const nameInput = carCreator.querySelector<HTMLInputElement>('#create-name');
+      if (!nameInput) return;
+      const name = nameInput.value;
+      const colorInput = carCreator.querySelector<HTMLInputElement>('#create-color');
+      if (!colorInput) return;
+      const color = colorInput.value;
+      await carService.createCar(name, color);
+      this.reDrawPage();
+    });
+    carCreator.querySelector('#update-btn')?.addEventListener('click', async () => {
+      const idInput = carCreator.querySelector<HTMLInputElement>('.update-cars input[type=\'hidden\']');
+      const nameInput = carCreator.querySelector<HTMLInputElement>('.update-cars input[type=\'text\']');
+      const colorInput = carCreator.querySelector<HTMLInputElement>('.update-cars input[type=\'color\']');
+      if (!idInput || !nameInput || !colorInput) return;
+      await carService.updateCar(+idInput.value, nameInput.value, colorInput.value);
+      await this.reDrawPage();
+    });
     return carCreator;
   }
+
+  async generateCars() {
+    const carService = new CarService();
+    for (let i = 0; i < 100; i++) {
+      const color = this.colors[Math.ceil(Math.random() * this.colors.length) - 1];
+      const carName = this.namesOfCars[Math.ceil(Math.random() * this.namesOfCars.length) - 1];
+      await carService.createCar(carName, color);
+    }
+    document.querySelector('.garage')?.remove();
+    await this.drawPage();
+  }
+
 }
 export default GaragePage;

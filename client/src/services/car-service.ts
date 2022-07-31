@@ -1,10 +1,20 @@
+import { Icar } from '../interfaces/car-interface';
+
 class CarService {
   url = 'http://127.0.0.1:3000';
 
-  async getCars(limit = 4) {
-    await fetch(`${this.url}/garage?_limit=${limit}`)
+  async getCars(limit = 7, page = 1) {
+    let totalCount = 0;
+    let cars: Icar[] = [];
+    await fetch(`${this.url}/garage?_limit=${limit}&_page=${page}`)
+      .then((res) => {
+        totalCount = +res.headers.get('X-Total-Count')!;
+        return res;
+      })
       .then((data) => data.json())
-      .then((data) => console.log(data));
+      .then((data: Icar[]) => cars = (data));
+    const res: [number, Icar[]] = [totalCount, cars];
+    return res;
   }
 
   async createCar(name = 'car', color = '#fff') {
