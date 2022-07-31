@@ -72,7 +72,7 @@ class GaragePage {
     car.innerHTML = `
     <div>
       <button id='select-btn' class="btn">Select</button>
-      <button class="btn">Remove</button>
+      <button id='remove-btn' class="btn">Remove</button>
       <input class='current-car-id' type='hidden' value=${id}>
       <input class='current-car-color' type='hidden' value=${color}>
       <span class='car-name'>${name}</span>
@@ -103,6 +103,12 @@ class GaragePage {
       if (!prevCarId) return;
       if (!carId) return;
       prevCarId.value = carId.value;
+    });
+    car.querySelector('#remove-btn')?.addEventListener('click', async () => {
+      const carId = car.querySelector<HTMLInputElement>('.current-car-id');
+      if (!carId) return;
+      await new CarService().deleteCar(id);
+      await this.reDrawPage();
     });
     return car;
   }
