@@ -27,13 +27,21 @@ class GaragePage {
       <button
         class="btn" id='garage-next'>Next</button>
     </div>`;
-    garagePage.querySelector('#garage-next')?.addEventListener('click', async () => {
-      GaragePage.page++;
-      await this.reDrawPage();
+    garagePage.querySelector('#garage-next')?.addEventListener('click', () => {
+      (async () => {
+        GaragePage.page++;
+        await this.reDrawPage();
+      })()
+        .then(() => console.log('success'))
+        .catch(() => console.log('error'));
     });
-    garagePage.querySelector('#garage-prev')?.addEventListener('click', async () => {
-      GaragePage.page--;
-      await this.reDrawPage();
+    garagePage.querySelector('#garage-prev')?.addEventListener('click', () => {
+      (async () => {
+        GaragePage.page--;
+        await this.reDrawPage();
+      })()
+        .then(() => console.log('success'))
+        .catch(() => console.log('error'));
     });
     const carList = garagePage.querySelector('.car-list');
     if (carList) {
@@ -104,11 +112,17 @@ class GaragePage {
       if (!carId) return;
       prevCarId.value = carId.value;
     });
-    car.querySelector('#remove-btn')?.addEventListener('click', async () => {
-      const carId = car.querySelector<HTMLInputElement>('.current-car-id');
-      if (!carId) return;
-      await new CarService().deleteCar(id);
-      await this.reDrawPage();
+    car.querySelector('#remove-btn')?.addEventListener('click', () => {
+      (async () => {
+        {
+          const carId = car.querySelector<HTMLInputElement>('.current-car-id');
+          if (!carId) return;
+          await new CarService().deleteCar(id);
+          await this.reDrawPage();
+        }
+      })()
+        .then(() => console.log('success'))
+        .catch(() => console.log('error'));
     });
     return car;
   }
@@ -134,25 +148,42 @@ class GaragePage {
     <button id='generate' class="btn">Generate</button>
   </div>`;
     carCreator.querySelector('#generate')?.addEventListener('click', () => {
-      this.generateCars();
+      (async () => {
+        await this.generateCars();
+      })()
+        .then(() => console.log('success'))
+        .catch(() => console.log('error'));
     });
-    carCreator.querySelector('#create-btn')?.addEventListener('click', async () => {
-      const nameInput = carCreator.querySelector<HTMLInputElement>('#create-name');
-      if (!nameInput) return;
-      const name = nameInput.value;
-      const colorInput = carCreator.querySelector<HTMLInputElement>('#create-color');
-      if (!colorInput) return;
-      const color = colorInput.value;
-      await carService.createCar(name, color);
-      this.reDrawPage();
+    carCreator.querySelector('#create-btn')?.addEventListener('click', () => {
+
+      (async () => {
+        {
+          const nameInput = carCreator.querySelector<HTMLInputElement>('#create-name');
+          if (!nameInput) return;
+          const name = nameInput.value;
+          const colorInput = carCreator.querySelector<HTMLInputElement>('#create-color');
+          if (!colorInput) return;
+          const color = colorInput.value;
+          await carService.createCar(name, color);
+          await this.reDrawPage();
+        }
+      })()
+        .then(() => console.log('success'))
+        .catch(() => console.log('error'));
     });
-    carCreator.querySelector('#update-btn')?.addEventListener('click', async () => {
-      const idInput = carCreator.querySelector<HTMLInputElement>('.update-cars input[type=\'hidden\']');
-      const nameInput = carCreator.querySelector<HTMLInputElement>('.update-cars input[type=\'text\']');
-      const colorInput = carCreator.querySelector<HTMLInputElement>('.update-cars input[type=\'color\']');
-      if (!idInput || !nameInput || !colorInput) return;
-      await carService.updateCar(+idInput.value, nameInput.value, colorInput.value);
-      await this.reDrawPage();
+    carCreator.querySelector('#update-btn')?.addEventListener('click', () => {
+      (async () => {
+        {
+          const idInput = carCreator.querySelector<HTMLInputElement>('.update-cars input[type=\'hidden\']');
+          const nameInput = carCreator.querySelector<HTMLInputElement>('.update-cars input[type=\'text\']');
+          const colorInput = carCreator.querySelector<HTMLInputElement>('.update-cars input[type=\'color\']');
+          if (!idInput || !nameInput || !colorInput) return;
+          await carService.updateCar(+idInput.value, nameInput.value, colorInput.value);
+          await this.reDrawPage();
+        }
+      })()
+        .then(() => console.log('success'))
+        .catch(() => console.log('error'));
     });
     return carCreator;
   }
