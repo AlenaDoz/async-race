@@ -28,6 +28,7 @@ class MainPage {
     }
     switch (pageToDraw) {
       case 'Winner':
+        console.log(WinnersPage.page);
         document.querySelector<HTMLButtonElement>('#toWinners')!.disabled = true;
         document.querySelector<HTMLButtonElement>('#toGarage')!.disabled = false;
         new WinnersPage().drawPage();

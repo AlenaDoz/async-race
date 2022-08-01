@@ -1,3 +1,4 @@
+import { Iwinner } from '../../interfaces/winner-interface';
 import WinnerService from '../../services/winner-service';
 
 class WinnersPage {
@@ -5,12 +6,20 @@ class WinnersPage {
 
   static order = 'ASC';
 
+  static page = 1;
+
   async drawPage() {
+    console.log(WinnersPage.page);
     const winnerPage = document.createElement('div');
+    const winnerService = new WinnerService();
+    const [winners, count] = await winnerService.getWinners(WinnersPage.page, 10, WinnersPage.sort, WinnersPage.order);
+    const winnersPerPage = 10;
+    const pageCount = Math.ceil(count as number / winnersPerPage);
+    const { page } = WinnersPage;
     winnerPage.classList.add('winners');
     winnerPage.innerHTML = `
-    <h2>Winners <span>3</span></h2>
-    <h3>Page <span>1</span></h3>
+    <h2>Winners <span>${count as number}</span></h2>
+    <h3>Page <span>${WinnersPage.page}</span></h3>
     <table>
       <tr>
         <th>Number</th>
@@ -22,16 +31,41 @@ class WinnersPage {
       <div
         class="pagination">
         <button
-          class="btn">Prev</button>
+          class="btn prev-winner-page">Prev</button>
         <button
-          class="btn">Next</button>
+          class="btn next-winner-page">Next</button>
       </div>`;
+    const prevBtn = winnerPage.querySelector('.prev-winner-page');
+    const nextBtn = winnerPage.querySelector('.next-winner-page');
+    if (prevBtn && nextBtn) {
+      prevBtn.addEventListener('click', () => {
+        (async () => {
+          WinnersPage.page--;
+          await this.reDrawPage();
+        })()
+          .then(() => console.log('success'))
+          .catch(() => console.log('error'));
+      });
+      nextBtn.addEventListener('click', () => {
+        (async () => {
+          WinnersPage.page++;
+          await this.reDrawPage();
+        })()
+          .then(() => console.log('success'))
+          .catch(() => console.log('error'));
+      });
+
+      if (page === 1) {
+        (prevBtn as HTMLButtonElement).disabled = true;
+      }
+      if (page === pageCount) {
+        (nextBtn as HTMLButtonElement).disabled = true;
+      }
+    }
     const winnerList = winnerPage.querySelector('table');
-    const winnerService = new WinnerService();
-    const winners = await winnerService.getWinners(1, 10, WinnersPage.sort, WinnersPage.order);
     if (winnerList) {
-      winners.forEach((winner, index) => {
-        winnerList.append(this.drawWinner(index + 1, 'red', 'Mersedes', winner.wins, winner.time));
+      (winners as Iwinner[]).forEach((winner, index) => {
+        winnerList.append(this.drawWinner((page - 1) * 10 + index + 1, 'red', 'Mersedes', winner.wins, winner.time));
       });
       winnerPage.querySelector('#wins-btn')?.addEventListener('click', () => {
         (async () => {

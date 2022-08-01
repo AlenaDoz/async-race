@@ -4,17 +4,22 @@ class WinnerService {
   url = 'http://127.0.0.1:3000';
 
   async getWinners(page = 1, limit = 3, sort = 'win', order = 'ASC') {
+    let count = 0;
     let winners: Iwinner[] = [];
     await fetch(`${this.url}/winners?_page=${page}&_limit=${limit}&_sort=${sort}&_order=${order}`)
       .then((response) => {
         if (response.ok) {
+          const totalCount = response.headers.get('X-Total-Count');
+          if (totalCount) {
+            count = +totalCount;
+          }
           return response;
         }
         throw new Error('No such car');
       })
       .then((data) => data.json())
       .then((data: Iwinner[]) => winners = data);
-    return winners;
+    return [winners, count];
   }
 
   async getWinner(id = 6) {
