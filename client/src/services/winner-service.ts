@@ -1,7 +1,10 @@
+import { Iwinner } from '../interfaces/winner-interface';
+
 class WinnerService {
   url = 'http://127.0.0.1:3000';
 
   async getWinners(page = 1, limit = 3, sort = 'win', order = 'ASC') {
+    let winners: Iwinner[] = [];
     await fetch(`${this.url}/winners?_page=${page}&_limit=${limit}&_sort=${sort}&_order=${order}`)
       .then((response) => {
         if (response.ok) {
@@ -10,7 +13,8 @@ class WinnerService {
         throw new Error('No such car');
       })
       .then((data) => data.json())
-      .then((data) => console.log(data));
+      .then((data: Iwinner[]) => winners = data);
+    return winners;
   }
 
   async getWinner(id = 6) {
