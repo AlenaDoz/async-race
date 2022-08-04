@@ -97,6 +97,7 @@ class GaragePage {
                 <div class="finish"></div>
               </div>
             </div>`;
+    const carImage = car.querySelector<SVGElement>('.car');
     car.querySelector('#select-btn')?.addEventListener('click', () => {
       const text = document.querySelector<HTMLInputElement>('.update-cars input[type =\'text\']');
       const carName = car.querySelector<HTMLElement>('.car-name');
@@ -104,41 +105,71 @@ class GaragePage {
       if (!carName) return;
       text.value = carName.innerText;
       const oldColor = document.querySelector<HTMLInputElement>('.update-cars input[type =\'color\']');
-      const carColor = car.querySelector<SVGElement>('.car');
       if (!oldColor) return;
-      if (!carColor) return;
-      oldColor.value = carColor.getAttribute('fill')!;
+      if (!carImage) return;
+      oldColor.value = carImage.getAttribute('fill')!;
       const prevCarId = document.querySelector<HTMLInputElement>('.update-cars input[type =\'hidden\']');
       const carId = car.querySelector<HTMLInputElement>('.current-car-id');
       if (!prevCarId) return;
       if (!carId) return;
       prevCarId.value = carId.value;
     });
-    car.querySelector('#a-btn')?.addEventListener('click', () => {
-      (async () => {
-        const engineService = new EngineService();
-        const time = await engineService.startStopEngine(id, 'started');
-        this.animate(time);
-        await engineService.switchEngineDriveMode(id, 'drive')
-          .then(
-            () => this.animate(time))
-          .catch(
-            () => this.animate(0),
-          );
-      }
-      )()
-        .then(() => console.log('success'))
-        .catch(() => console.log('error'));
-    });
-    car.querySelector('#b-btn')?.addEventListener('click', () => {
-      (async () => {
-        const engineService = new EngineService();
-        await engineService.startStopEngine(id, 'stopped');
-      }
-      )()
-        .then(() => console.log('success'))
-        .catch(() => console.log('error'));
-    });
+    let requestId: number;
+    const aBtn = car.querySelector<HTMLButtonElement>('#a-btn');
+    const bBtn = car.querySelector<HTMLButtonElement>('#b-btn');
+    if (aBtn && bBtn) {
+      bBtn.disabled = true;
+      aBtn.addEventListener('click', () => {
+        aBtn.disabled = true;
+        bBtn.disabled = false;
+        (async () => {
+          console.log('strin');
+          const engineService = new EngineService();
+          const duration = await engineService.startStopEngine(id, 'started');
+          function animate() {
+            const prev = performance.now();
+            requestAnimationFrame(function animate(time) {
+              const timeFraction = (time - prev) / duration;
+              if (carImage) {
+                const carWidth = carImage.getBoundingClientRect().width;
+                const left = carImage.getBoundingClientRect().left;
+                const length = document.querySelector<HTMLElement>('.road')?.getBoundingClientRect().width;
+                carImage.style.left = `${75 + timeFraction * (length! - carWidth)}px`;
+                if (timeFraction < 1) {
+                  if (left < (length! - carWidth))
+                    requestId = requestAnimationFrame(animate);
+                }
+              }
+            });
+          }
+          requestId = requestAnimationFrame(animate);
+          await engineService.switchEngineDriveMode(id, 'drive')
+            .then(
+              () => console.log(duration))
+            .catch(
+              () => cancelAnimationFrame(requestId),
+            );
+        }
+        )()
+          .then(() => console.log('success'))
+          .catch(() => console.log('error'));
+      });
+      bBtn.addEventListener('click', () => {
+        aBtn.disabled = false;
+        bBtn.disabled = true;
+        (async () => {
+          const engineService = new EngineService();
+          await engineService.startStopEngine(id, 'stopped');
+          cancelAnimationFrame(requestId);
+          if (carImage) {
+            carImage.style.left = '75px';
+          }
+        }
+        )()
+          .then(() => console.log('success'))
+          .catch(() => console.log('error'));
+      });
+    }
     car.querySelector('#remove-btn')?.addEventListener('click', () => {
       (async () => {
         {
@@ -152,10 +183,6 @@ class GaragePage {
         .catch(() => console.log('error'));
     });
     return car;
-  }
-
-  animate(time: number) {
-    console.log(time);
   }
 
   drawCarCreator() {
