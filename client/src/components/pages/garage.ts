@@ -123,7 +123,6 @@ class GaragePage {
         aBtn.disabled = true;
         bBtn.disabled = false;
         (async () => {
-          console.log('strin');
           const engineService = new EngineService();
           const duration = await engineService.startStopEngine(id, 'started');
           function animate() {
@@ -201,10 +200,53 @@ class GaragePage {
     <button  id="update-btn" class="btn">Update</button>
   </div>
   <div class="interactivity-cars">
-    <button class="btn">Race</button>
-    <button class="btn">Reset</button>
+    <button id='race-btn' class="btn">Race</button>
+    <button id='reset-btn' class="btn">Reset</button>
     <button id='generate' class="btn">Generate</button>
   </div>`;
+    carCreator.querySelector('#race-btn')?.addEventListener('click', () => {
+      document.querySelectorAll('.car-item').forEach((car) => {
+        const aBtn = car.querySelector<HTMLButtonElement>('#a-btn');
+        const bBtn = car.querySelector<HTMLButtonElement>('#b-btn');
+        if (aBtn && bBtn) {
+          aBtn.disabled = true;
+          bBtn.disabled = false;
+        }
+        const id = +car.querySelector<HTMLInputElement>('.current-car-id')!.value;
+        const carImage = car.querySelector<SVGElement>('.car');
+        let requestId: number;
+        (async () => {
+          const engineService = new EngineService();
+          const duration = await engineService.startStopEngine(id, 'started');
+          function animate() {
+            const prev = performance.now();
+            requestAnimationFrame(function animate(time) {
+              const timeFraction = (time - prev) / duration;
+              if (carImage) {
+                const carWidth = carImage.getBoundingClientRect().width;
+                const left = carImage.getBoundingClientRect().left;
+                const length = document.querySelector<HTMLElement>('.road')?.getBoundingClientRect().width;
+                carImage.style.left = `${75 + timeFraction * (length! - carWidth)}px`;
+                if (timeFraction < 1) {
+                  if (left < (length! - carWidth))
+                    requestId = requestAnimationFrame(animate);
+                }
+              }
+            });
+          }
+          requestId = requestAnimationFrame(animate);
+          await engineService.switchEngineDriveMode(id, 'drive')
+            .then(
+              () => console.log(duration))
+            .catch(
+              () => cancelAnimationFrame(requestId),
+            );
+        }
+        )()
+          .then(() => console.log('success'))
+          .catch(() => console.log('error'));
+      });
+    });
     carCreator.querySelector('#generate')?.addEventListener('click', () => {
       (async () => {
         await this.generateCars();
