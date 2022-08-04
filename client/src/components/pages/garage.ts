@@ -204,8 +204,33 @@ class GaragePage {
     <button id='reset-btn' class="btn">Reset</button>
     <button id='generate' class="btn">Generate</button>
   </div>`;
+    let requestIds: number[] = [];
+    carCreator.querySelector('#reset-btn')?.addEventListener('click', () => {
+      document.querySelectorAll('.car-item').forEach((car, index) => {
+        const aBtn = car.querySelector<HTMLButtonElement>('#a-btn');
+        const bBtn = car.querySelector<HTMLButtonElement>('#b-btn');
+        if (aBtn && bBtn) {
+          aBtn.disabled = false;
+          bBtn.disabled = true;
+        }
+        const id = +car.querySelector<HTMLInputElement>('.current-car-id')!.value;
+        const carImage = car.querySelector<SVGElement>('.car');
+        (async () => {
+          const engineService = new EngineService();
+          await engineService.startStopEngine(id, 'stopped');
+          cancelAnimationFrame(requestIds[index]);
+          if (carImage) {
+            carImage.style.left = '75px';
+          }
+        }
+        )()
+          .then(() => console.log('success'))
+          .catch(() => console.log('error'));
+
+      });
+    });
     carCreator.querySelector('#race-btn')?.addEventListener('click', () => {
-      document.querySelectorAll('.car-item').forEach((car) => {
+      document.querySelectorAll('.car-item').forEach((car, index) => {
         const aBtn = car.querySelector<HTMLButtonElement>('#a-btn');
         const bBtn = car.querySelector<HTMLButtonElement>('#b-btn');
         if (aBtn && bBtn) {
@@ -214,7 +239,6 @@ class GaragePage {
         }
         const id = +car.querySelector<HTMLInputElement>('.current-car-id')!.value;
         const carImage = car.querySelector<SVGElement>('.car');
-        let requestId: number;
         (async () => {
           const engineService = new EngineService();
           const duration = await engineService.startStopEngine(id, 'started');
@@ -229,17 +253,17 @@ class GaragePage {
                 carImage.style.left = `${75 + timeFraction * (length! - carWidth)}px`;
                 if (timeFraction < 1) {
                   if (left < (length! - carWidth))
-                    requestId = requestAnimationFrame(animate);
+                    requestIds[index] = requestAnimationFrame(animate);
                 }
               }
             });
           }
-          requestId = requestAnimationFrame(animate);
+          requestIds[index] = requestAnimationFrame(animate);
           await engineService.switchEngineDriveMode(id, 'drive')
             .then(
               () => console.log(duration))
             .catch(
-              () => cancelAnimationFrame(requestId),
+              () => cancelAnimationFrame(requestIds[index]),
             );
         }
         )()
