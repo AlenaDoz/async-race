@@ -126,3 +126,10 @@ table {
 .engine-buttons {
   position: absolute;
 }
+
+.winner-declaration {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}

@@ -62,7 +62,8 @@ class GaragePage {
   }
 
   async reDrawPage() {
-    document.querySelector('.garage')?.remove();
+    const garage = document.querySelector('.garage');
+    if (garage) garage.remove();
     await this.drawPage();
   }
 
@@ -125,7 +126,7 @@ class GaragePage {
         (async () => {
           const engineService = new EngineService();
           const duration = await engineService.startStopEngine(id, 'started');
-          function animate() {
+          function moveAnimate() {
             const prev = performance.now();
             requestAnimationFrame(function animate(time) {
               const timeFraction = (time - prev) / duration;
@@ -141,7 +142,7 @@ class GaragePage {
               }
             });
           }
-          requestId = requestAnimationFrame(animate);
+          requestId = requestAnimationFrame(moveAnimate);
           await engineService.switchEngineDriveMode(id, 'drive')
             .then(
               () => console.log(duration))
@@ -204,7 +205,7 @@ class GaragePage {
     <button id='reset-btn' class="btn">Reset</button>
     <button id='generate' class="btn">Generate</button>
   </div>`;
-    let requestIds: number[] = [];
+    const requestIds: number[] = [];
     carCreator.querySelector('#reset-btn')?.addEventListener('click', () => {
       document.querySelectorAll('.car-item').forEach((car, index) => {
         const aBtn = car.querySelector<HTMLButtonElement>('#a-btn');
@@ -230,19 +231,22 @@ class GaragePage {
       });
     });
     carCreator.querySelector('#race-btn')?.addEventListener('click', () => {
+      let winner = false;
       document.querySelectorAll('.car-item').forEach((car, index) => {
-        const aBtn = car.querySelector<HTMLButtonElement>('#a-btn');
-        const bBtn = car.querySelector<HTMLButtonElement>('#b-btn');
-        if (aBtn && bBtn) {
-          aBtn.disabled = true;
-          bBtn.disabled = false;
-        }
-        const id = +car.querySelector<HTMLInputElement>('.current-car-id')!.value;
-        const carImage = car.querySelector<SVGElement>('.car');
         (async () => {
+          const aBtn = car.querySelector<HTMLButtonElement>('#a-btn');
+          const bBtn = car.querySelector<HTMLButtonElement>('#b-btn');
+          if (aBtn && bBtn) {
+            aBtn.disabled = true;
+            bBtn.disabled = false;
+          }
+          const carName = car.querySelector<HTMLElement>('.car-name')?.innerHTML || '';
+          const id = +car.querySelector<HTMLInputElement>('.current-car-id')!.value;
+          const carImage = car.querySelector<SVGElement>('.car');
+
           const engineService = new EngineService();
           const duration = await engineService.startStopEngine(id, 'started');
-          function animate() {
+          function moveAnimate() {
             const prev = performance.now();
             requestAnimationFrame(function animate(time) {
               const timeFraction = (time - prev) / duration;
@@ -258,16 +262,27 @@ class GaragePage {
               }
             });
           }
-          requestIds[index] = requestAnimationFrame(animate);
+          requestIds[index] = requestAnimationFrame(moveAnimate);
+          // type EngineDriveType = {
+          //   success: boolean
+          // };
           await engineService.switchEngineDriveMode(id, 'drive')
             .then(
-              () => console.log(duration))
+              () => {
+                if (!winner) {
+                  winner = true;
+                  const winnerDeclaration = document.createElement('h2');
+                  winnerDeclaration.classList.add('winner-declaration');
+                  winnerDeclaration.innerText = `Winner is ${carName}, ${(Math.floor(duration / 10)) / 100}`;
+                  document.body.append(winnerDeclaration);
+                }
+              })
             .catch(
               () => cancelAnimationFrame(requestIds[index]),
             );
         }
         )()
-          .then(() => console.log('success'))
+          .then(() => console.log('Car has successfully arrived!'))
           .catch(() => console.log('error'));
       });
     });
