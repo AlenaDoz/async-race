@@ -23,9 +23,11 @@ class WinnerService {
   }
 
   async getWinner(id = 6) {
+    let winner: Iwinner = {} as Iwinner;
     await fetch(`${this.url}/winners/${id}`)
       .then((data) => data.json())
-      .then((data) => console.log(data));
+      .then((data: Iwinner) => winner = data);
+    return winner;
   }
 
   async createWinner(id = 0, wins = 2, time = 2.3) {

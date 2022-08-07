@@ -33,6 +33,7 @@ class CarService {
   }
 
   async getCar(id = 0) {
+    let carInfo = {} as Icar;
     await fetch(`${this.url}/garage/${id}`)
       .then((response) => {
         if (response.ok) {
@@ -41,7 +42,8 @@ class CarService {
         throw new Error('No such car');
       })
       .then((data) => data.json())
-      .then((data) => console.log(data));
+      .then((data: Icar) => carInfo = data);
+    return carInfo;
   }
 
   async deleteCar(id = 0) {

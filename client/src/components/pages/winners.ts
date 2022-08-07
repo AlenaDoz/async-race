@@ -1,4 +1,5 @@
 import { Iwinner } from '../../interfaces/winner-interface';
+import CarService from '../../services/car-service';
 import WinnerService from '../../services/winner-service';
 
 class WinnersPage {
@@ -63,9 +64,11 @@ class WinnersPage {
       }
     }
     const winnerList = winnerPage.querySelector('table');
+    const carService = new CarService();
     if (winnerList) {
-      (winners as Iwinner[]).forEach((winner, index) => {
-        winnerList.append(this.drawWinner((page - 1) * 10 + index + 1, 'red', 'Mersedes', winner.wins, winner.time));
+      (winners as Iwinner[]).forEach(async (winner, index) => {
+        const carInfo = await carService.getCar(winner.id);
+        winnerList.append(this.drawWinner((page - 1) * 10 + index + 1, carInfo.color, carInfo.name, winner.wins, winner.time));
       });
       winnerPage.querySelector('#wins-btn')?.addEventListener('click', () => {
         (async () => {

@@ -1,6 +1,7 @@
 //import { Iengine } from '../../interfaces/engine-interface';
 import CarService from '../../services/car-service';
 import EngineService from '../../services/engine-service';
+import WinnerService from '../../services/winner-service';
 
 class GaragePage {
 
@@ -207,6 +208,7 @@ class GaragePage {
   </div>`;
     const requestIds: number[] = [];
     carCreator.querySelector('#reset-btn')?.addEventListener('click', () => {
+      document.querySelector('.winner-declaration')?.remove();
       document.querySelectorAll('.car-item').forEach((car, index) => {
         const aBtn = car.querySelector<HTMLButtonElement>('#a-btn');
         const bBtn = car.querySelector<HTMLButtonElement>('#b-btn');
@@ -268,13 +270,25 @@ class GaragePage {
           // };
           await engineService.switchEngineDriveMode(id, 'drive')
             .then(
-              () => {
+              async () => {
                 if (!winner) {
                   winner = true;
+                  const garagePage = document.querySelector('.garage');
                   const winnerDeclaration = document.createElement('h2');
                   winnerDeclaration.classList.add('winner-declaration');
                   winnerDeclaration.innerText = `Winner is ${carName}, ${(Math.floor(duration / 10)) / 100}`;
-                  document.body.append(winnerDeclaration);
+                  if (garagePage) garagePage.append(winnerDeclaration);
+                  const winnerService = new WinnerService();
+                  try {
+                    await winnerService.createWinner(id, 1, (Math.floor(duration / 10)) / 100);
+                  } catch (e) {
+                    const winnerInfo = await winnerService.getWinner(id);
+                    if (winnerInfo) {
+                      const wins = winnerInfo.wins;
+                      const bestTime = winnerInfo.time < (Math.floor(duration / 10) / 100) ? winnerInfo.time : Math.floor(duration / 10) / 100;
+                      await winnerService.updateWinner(id, wins + 1, bestTime);
+                    }
+                  }
                 }
               })
             .catch(
