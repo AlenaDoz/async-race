@@ -7,6 +7,8 @@ class GaragePage {
 
   namesOfCars = ['BMW', 'Mersedes', 'Mazda', 'Toyota', 'Tesla', 'Volvo', 'VW', 'Opel', 'Jaguar', 'Shkoda'];
 
+  namesOfModels = ['X5', 'SLS', 'CX7', 'Land Cruiser', 'modelX', 'XC90', 'Polo', 'Omega', 'XJ', 'Rapid'];
+
   colors = ['red', 'pink', 'blue', 'black', 'teal', 'purple', 'yellow', 'green', 'brown', 'grey', 'salmon', 'black', 'fuchsia', 'gold', 'olive', 'crimson', 'cyan'];
 
   static page = 1;
@@ -346,7 +348,8 @@ class GaragePage {
     for (let i = 0; i < 100; i++) {
       const color = this.colors[Math.ceil(Math.random() * this.colors.length) - 1];
       const carName = this.namesOfCars[Math.ceil(Math.random() * this.namesOfCars.length) - 1];
-      await carService.createCar(carName, color);
+      const carModel = this.namesOfModels[Math.ceil(Math.random() * this.namesOfModels.length) - 1];
+      await carService.createCar(`${carName} ${carModel}`, color);
     }
     document.querySelector('.garage')?.remove();
     await this.drawPage();
