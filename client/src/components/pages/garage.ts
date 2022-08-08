@@ -372,6 +372,5 @@ class GaragePage {
     document.querySelector('.garage')?.remove();
     await this.drawPage();
   }
-
 }
 export default GaragePage;
