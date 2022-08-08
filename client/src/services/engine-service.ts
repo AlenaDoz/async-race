@@ -8,7 +8,7 @@ class EngineService {
     await fetch(`${this.url}?id=${id}&status=${status}`, {
       method: 'PATCH',
     })
-      .then((response) => {
+      .then((response: Response) => {
         if (!response.ok) {
           if (response.status === 404) {
             throw new Error('Car with such id was not found in the garage.');
@@ -28,7 +28,7 @@ class EngineService {
   }
 
   async switchEngineDriveMode(id = 0, status = 'drive') {
-    const response = await fetch(`${this.url}?id=${id}&status=${status}`, {
+    const response: Response = await fetch(`${this.url}?id=${id}&status=${status}`, {
       method: 'PATCH',
     });
 

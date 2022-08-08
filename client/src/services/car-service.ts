@@ -11,7 +11,7 @@ class CarService {
         totalCount = +res.headers.get('X-Total-Count')!;
         return res;
       })
-      .then((data) => data.json())
+      .then((data: Response) => data.json())
       .then((data: Icar[]) => cars = (data));
     const res: [number, Icar[]] = [totalCount, cars];
     return res;
@@ -28,8 +28,7 @@ class CarService {
         color,
       }),
     })
-      .then((data) => data.json())
-      .then((data) => console.log(data));
+      .then((data: Response) => data.json());
   }
 
   async getCar(id = 0) {
@@ -41,7 +40,7 @@ class CarService {
         }
         throw new Error('No such car');
       })
-      .then((data) => data.json())
+      .then((data: Response) => data.json())
       .then((data: Icar) => carInfo = data);
     return carInfo;
   }
@@ -56,8 +55,7 @@ class CarService {
         }
         throw new Error('Car is not deleted');
       })
-      .then((data) => data.json())
-      .then((data) => console.log(data));
+      .then((data: Response) => data.json());
   }
 
   async updateCar(id = 0, name = 'Tesla', color = '#fff') {
@@ -71,14 +69,13 @@ class CarService {
         color,
       }),
     })
-      .then((response) => {
+      .then((response: Response) => {
         if (response.ok) {
           return response;
         }
         throw new Error('Car is not deleted');
       })
-      .then((data) => data.json())
-      .then((data) => console.log(data));
+      .then((data: Response) => data.json());
   }
 }
 export default CarService;

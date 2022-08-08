@@ -7,37 +7,50 @@ class MainPage {
     btns.innerHTML = `<button id='toGarage' disabled class='btn'>To garage</button>
     <button id='toWinners' class="btn">To winners</button>`;
     btns.querySelector('#toGarage')?.addEventListener('click', () => {
-      this.handlePages('.winners', 'Garage');
+      (async () => {
+        await this.handlePages('.winners', 'Garage');
+      })()
+        .then(() => console.log('succes'))
+        .catch(() => console.log('error'));
+
     });
     btns.querySelector('#toWinners')?.addEventListener('click', () => {
-      this.handlePages('.garage', 'Winner');
+      (async () => {
+        await this.handlePages('.garage', 'Winner');
+      })()
+        .then(() => console.log('succes'))
+        .catch(() => console.log('error'));
     });
 
     document.body.append(btns);
   }
 
-  drawPage() {
+  async drawPage() {
     this.drawBtns();
-    new GaragePage().drawPage();
+    await new GaragePage().drawPage();
   }
 
-  handlePages(selector: string, pageToDraw: string) {
+  async handlePages(selector: string, pageToDraw: string) {
     const removedPage = document.querySelector(selector);
     if (removedPage) {
       removedPage.remove();
     }
-    switch (pageToDraw) {
-      case 'Winner':
-        console.log(WinnersPage.page);
-        document.querySelector<HTMLButtonElement>('#toWinners')!.disabled = true;
-        document.querySelector<HTMLButtonElement>('#toGarage')!.disabled = false;
-        new WinnersPage().drawPage();
-        break;
-      case 'Garage':
-        document.querySelector<HTMLButtonElement>('#toWinners')!.disabled = false;
-        document.querySelector<HTMLButtonElement>('#toGarage')!.disabled = true;
-        new GaragePage().drawPage();
-        break;
+    const toWinnersBtn = document.querySelector<HTMLButtonElement>('#toWinners');
+    const toGarageBtn = document.querySelector<HTMLButtonElement>('#toGarage');
+    if (toWinnersBtn && toGarageBtn) {
+      switch (pageToDraw) {
+        case 'Winner':
+          console.log(WinnersPage.page);
+          toWinnersBtn.disabled = true;
+          toGarageBtn.disabled = false;
+          await new WinnersPage().drawPage();
+          break;
+        case 'Garage':
+          toWinnersBtn.disabled = false;
+          toGarageBtn.disabled = true;
+          await new GaragePage().drawPage();
+          break;
+      }
     }
   }
 }

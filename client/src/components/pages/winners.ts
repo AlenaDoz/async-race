@@ -9,35 +9,12 @@ class WinnersPage {
 
   static page = 1;
 
-  async drawPage() {
-    console.log(WinnersPage.page);
-    const winnerPage = document.createElement('div');
-    const winnerService = new WinnerService();
-    const [winners, count] = await winnerService.getWinners(WinnersPage.page, 10, WinnersPage.sort, WinnersPage.order);
+  onPrevNextClick(parentElement: HTMLElement, count: number) {
+    const prevBtn = parentElement.querySelector('.prev-winner-page');
+    const nextBtn = parentElement.querySelector('.next-winner-page');
     const winnersPerPage = 10;
-    const pageCount = Math.ceil(count as number / winnersPerPage);
+    const pageCount = Math.ceil(count / winnersPerPage);
     const { page } = WinnersPage;
-    winnerPage.classList.add('winners');
-    winnerPage.innerHTML = `
-    <h2>Winners <span>${count as number}</span></h2>
-    <h3>Page <span>${WinnersPage.page}</span></h3>
-    <table>
-      <tr>
-        <th>Number</th>
-        <th>Car</th>
-        <th>Name</th>
-        <th id='wins-btn'>Wins</th>
-        <th id='time-btn'>Best time</th>
-      </tr> </table>
-      <div
-        class="pagination">
-        <button
-          class="btn prev-winner-page">Prev</button>
-        <button
-          class="btn next-winner-page">Next</button>
-      </div>`;
-    const prevBtn = winnerPage.querySelector('.prev-winner-page');
-    const nextBtn = winnerPage.querySelector('.next-winner-page');
     if (prevBtn && nextBtn) {
       prevBtn.addEventListener('click', () => {
         (async () => {
@@ -63,36 +40,67 @@ class WinnersPage {
         (nextBtn as HTMLButtonElement).disabled = true;
       }
     }
-    const winnerList = winnerPage.querySelector('table');
-    const carService = new CarService();
-    if (winnerList) {
-      (winners as Iwinner[]).forEach(async (winner, index) => {
-        const carInfo = await carService.getCar(winner.id);
-        winnerList.append(this.drawWinner((page - 1) * 10 + index + 1, carInfo.color, carInfo.name, winner.wins, winner.time));
-      });
-      winnerPage.querySelector('#wins-btn')?.addEventListener('click', () => {
-        (async () => {
-          WinnersPage.sort = 'wins';
-          WinnersPage.order = WinnersPage.order === 'ASC' ? 'DESC' : 'ASC';
-          await this.reDrawPage();
-          console.log(WinnersPage.order);
+  }
 
+  drawWinners(parentElement: HTMLElement, winners: Iwinner[]) {
+    const winnerList = parentElement.querySelector('table');
+    const carService = new CarService();
+    const { page } = WinnersPage;
+    if (winnerList) {
+      winners.forEach((winner, index) => {
+        (async () => {
+          const carInfo = await carService.getCar(winner.id);
+          winnerList.append(this.drawWinner((page - 1) * 10 + index + 1, carInfo.color, carInfo.name, winner.wins, winner.time));
         })()
           .then(() => console.log('success'))
           .catch(() => console.log('error'));
       });
-      winnerPage.querySelector('#time-btn')?.addEventListener('click', () => {
+      parentElement.querySelector('#wins-btn')?.addEventListener('click', () => {
+        (async () => {
+          WinnersPage.sort = 'wins';
+          WinnersPage.order = WinnersPage.order === 'ASC' ? 'DESC' : 'ASC';
+          await this.reDrawPage();
+        })()
+          .then(() => console.log('success'))
+          .catch(() => console.log('error'));
+      });
+      parentElement.querySelector('#time-btn')?.addEventListener('click', () => {
         (async () => {
           WinnersPage.sort = 'time';
           WinnersPage.order = WinnersPage.order === 'ASC' ? 'DESC' : 'ASC';
           await this.reDrawPage();
-          console.log(WinnersPage.order);
-
         })()
           .then(() => console.log('success'))
           .catch(() => console.log('error'));
       });
     }
+  }
+
+  async drawPage() {
+    const winnerPage = document.createElement('div');
+    const winnerService = new WinnerService();
+    const [winners, count] = await winnerService.getWinners(WinnersPage.page, 10, WinnersPage.sort, WinnersPage.order);
+    winnerPage.classList.add('winners');
+    winnerPage.innerHTML = `
+    <h2>Winners <span>${count as number}</span></h2>
+    <h3>Page <span>${WinnersPage.page}</span></h3>
+    <table>
+      <tr>
+        <th>Number</th>
+        <th>Car</th>
+        <th>Name</th>
+        <th id='wins-btn'>Wins</th>
+        <th id='time-btn'>Best time</th>
+      </tr> </table>
+      <div
+        class="pagination">
+        <button
+          class="btn prev-winner-page">Prev</button>
+        <button
+          class="btn next-winner-page">Next</button>
+      </div>`;
+    this.onPrevNextClick(winnerPage, count as number);
+    this.drawWinners(winnerPage, winners as Iwinner[]);
     document.body.append(winnerPage);
   }
 

@@ -9,7 +9,7 @@ class WinnerService {
     await fetch(`${this.url}/winners?_page=${page}&_limit=${limit}&_sort=${sort}&_order=${order}`)
       .then((response) => {
         if (response.ok) {
-          const totalCount = response.headers.get('X-Total-Count');
+          const totalCount: string | null = response.headers.get('X-Total-Count');
           if (totalCount) {
             count = +totalCount;
           }
@@ -17,7 +17,7 @@ class WinnerService {
         }
         throw new Error('No such car');
       })
-      .then((data) => data.json())
+      .then((data: Response) => data.json())
       .then((data: Iwinner[]) => winners = data);
     return [winners, count];
   }
@@ -25,7 +25,7 @@ class WinnerService {
   async getWinner(id = 6) {
     let winner: Iwinner = {} as Iwinner;
     await fetch(`${this.url}/winners/${id}`)
-      .then((data) => data.json())
+      .then((data: Response) => data.json())
       .then((data: Iwinner) => winner = data);
     return winner;
   }
@@ -48,16 +48,14 @@ class WinnerService {
         }
         return response;
       })
-      .then((data) => data.json())
-      .then((data) => console.log(data));
+      .then((data: Response) => data.json());
   }
 
   async deleteWinner(id = 0) {
     await fetch(`${this.url}/winners/${id}`, {
       method: 'DELETE',
     })
-      .then((data) => data.json())
-      .then((data) => console.log(data));
+      .then((data: Response) => data.json());
   }
 
   async updateWinner(id = 0, wins = 1, time = 2.5) {
@@ -71,8 +69,7 @@ class WinnerService {
         time,
       }),
     })
-      .then((data) => data.json())
-      .then((data) => console.log(data));
+      .then((data: Response) => data.json());
   }
 }
 export default WinnerService;
