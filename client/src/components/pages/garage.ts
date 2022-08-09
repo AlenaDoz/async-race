@@ -1,4 +1,3 @@
-//import { Iengine } from '../../interfaces/engine-interface';
 import CarService from '../../services/car-service';
 import EngineService from '../../services/engine-service';
 import WinnerService from '../../services/winner-service';
@@ -63,6 +62,7 @@ class GaragePage {
     if (GaragePage.page === pagesCount) {
       (garagePage.querySelector('#garage-next') as HTMLButtonElement).disabled = true;
     }
+    this.onPrevNextClick(garagePage);
     garagePage.prepend(this.drawCarCreator());
     document.body.append(garagePage);
   }
@@ -238,6 +238,9 @@ class GaragePage {
                   winnerDeclaration.classList.add('winner-declaration');
                   winnerDeclaration.innerText = `Winner is ${carName}, ${(Math.floor(duration / 10)) / 100}`;
                   if (garagePage) garagePage.append(winnerDeclaration);
+                  setTimeout(() => {
+                    winnerDeclaration.remove()
+                  }, 3000)
                   const winnerService = new WinnerService();
                   try {
                     await winnerService.createWinner(id, 1, (Math.floor(duration / 10)) / 100);
@@ -264,7 +267,6 @@ class GaragePage {
 
   onResetClick(parentElement: HTMLElement, requestIds: number[]) {
     parentElement.querySelector('#reset-btn')?.addEventListener('click', () => {
-      document.querySelector('.winner-declaration')?.remove();
       document.querySelectorAll('.car-item').forEach((car, index) => {
         const aBtn = car.querySelector<HTMLButtonElement>('#a-btn');
         const bBtn = car.querySelector<HTMLButtonElement>('#b-btn');
